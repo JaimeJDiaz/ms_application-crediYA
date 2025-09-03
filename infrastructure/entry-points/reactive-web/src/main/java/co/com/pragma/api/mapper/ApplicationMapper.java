@@ -18,5 +18,5 @@ public interface ApplicationMapper {
 
     List<ResponseApplicationDto> toResponseApplicationDto(List<Application> applications);
 
-    }
 }
+
