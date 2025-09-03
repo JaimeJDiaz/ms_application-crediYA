@@ -3,10 +3,12 @@ package co.com.pragma.model.application.gateways;
 import co.com.pragma.model.application.Application;
 import reactor.core.publisher.Mono;
 
+import java.math.BigInteger;
+
 public interface ApplicationRepository {
 
     Mono<Application> saveApplication(Application application);
     Mono<Application> updateApplication(Application application);
 
-     Mono<Application> findById(String id);
+     Mono<Application> findById(BigInteger id);
 }

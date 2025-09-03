@@ -22,11 +22,12 @@ management:
         enabled: true
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
+
 adapters:
   r2dbc:
     host: "localhost"
     port: 5432
-    database: "ms_users_db"
+    database: "ms_application_db"
     schema: "public"
     username: "postgres"
     password: "admin"

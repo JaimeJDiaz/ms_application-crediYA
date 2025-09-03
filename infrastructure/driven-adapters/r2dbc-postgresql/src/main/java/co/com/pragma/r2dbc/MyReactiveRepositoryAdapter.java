@@ -1,23 +1,35 @@
 package co.com.pragma.r2dbc;
 
+import co.com.pragma.model.application.Application;
+import co.com.pragma.model.application.gateways.ApplicationRepository;
+import co.com.pragma.r2dbc.entity.ApplicationEntity;
 import co.com.pragma.r2dbc.helper.ReactiveAdapterOperations;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Mono;
+
+import java.math.BigInteger;
 
 @Repository
-public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
-    Object/* change for domain model */,
-    Object/* change for adapter model */,
-    String,
-    MyReactiveRepository
-> {
+public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<Application, ApplicationEntity, BigInteger, MyReactiveRepository> implements ApplicationRepository {
     public MyReactiveRepositoryAdapter(MyReactiveRepository repository, ObjectMapper mapper) {
-        /**
-         *  Could be use mapper.mapBuilder if your domain model implement builder pattern
-         *  super(repository, mapper, d -> mapper.mapBuilder(d,ObjectModel.ObjectModelBuilder.class).build());
-         *  Or using mapper.map with the class of the object model
-         */
-        super(repository, mapper, d -> mapper.map(d, Object.class/* change for domain model */));
+
+        super(repository, mapper, entity -> mapper.map(entity, Application.class));
     }
 
+    @Override
+    public Mono<Application> saveApplication(Application application) {
+        return super.save(application);
+    }
+
+    @Override
+    public Mono<Application> updateApplication(Application application) {
+        return super.save(application);
+    }
+
+    @Override
+    public Mono<Application> findById(BigInteger id) {
+        return super.repository.findById(id)
+                .map(entity -> mapper.map(entity, Application.class));
+    }
 }
