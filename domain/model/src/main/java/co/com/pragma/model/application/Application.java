@@ -1,4 +1,5 @@
 package co.com.pragma.model.application;
+import co.com.pragma.model.application.enums.Status;
 import lombok.Builder;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,5 +19,5 @@ public class Application {
     private BigDecimal amount;
     private String type;
     private BigInteger userId;
-    private String status;
+    private Status status;
 }

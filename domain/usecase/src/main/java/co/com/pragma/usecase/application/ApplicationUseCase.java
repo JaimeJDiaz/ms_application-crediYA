@@ -7,6 +7,8 @@ import co.com.pragma.usecase.application.exception.ApplicationNotFoundException;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
+import static co.com.pragma.model.application.enums.Status.*;
+
 @RequiredArgsConstructor
 public class ApplicationUseCase {
 
@@ -16,6 +18,7 @@ public class ApplicationUseCase {
 
     public Mono<Application> saveApplication(Application application) {
         return Mono.just(application)
+                .doOnNext(app -> app.setStatus(PENDING_REVIEW))
                 .doOnNext(applicationValidator::validateApplication)
                 .doOnNext(app -> log.debug("APPLICATION_VALIDATION_PASSED: {}"))
                 .flatMap(applicationRepository::saveApplication)
