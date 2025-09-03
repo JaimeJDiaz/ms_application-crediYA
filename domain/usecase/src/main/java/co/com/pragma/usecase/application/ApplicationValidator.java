@@ -4,7 +4,7 @@ import co.com.pragma.model.application.Application;
 
 public class ApplicationValidator {
     public void validateApplication(Application applicationToValidate) {
-        //TODO: implement validation
+        //TODO: implement validations
     }
 
 
