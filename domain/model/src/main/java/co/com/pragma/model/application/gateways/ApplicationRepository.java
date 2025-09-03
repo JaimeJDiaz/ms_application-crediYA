@@ -7,4 +7,6 @@ public interface ApplicationRepository {
 
     Mono<Application> saveApplication(Application application);
     Mono<Application> updateApplication(Application application);
+
+     Mono<Application> findById(String id);
 }
