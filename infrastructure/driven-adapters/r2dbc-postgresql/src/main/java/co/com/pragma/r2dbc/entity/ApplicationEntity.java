@@ -27,7 +27,6 @@ public class ApplicationEntity {
 
     @Column(name = "user_id")
     private BigInteger userId;
-
     private Status status;
 
 }
