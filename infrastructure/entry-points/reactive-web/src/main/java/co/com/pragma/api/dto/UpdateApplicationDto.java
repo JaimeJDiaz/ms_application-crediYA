@@ -1,10 +1,13 @@
 package co.com.pragma.api.dto;
 
-import co.com.pragma.model.application.enums.Status;
-import co.com.pragma.model.application.enums.Type;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-public record UpdateApplicationDto(BigInteger id, BigDecimal amount, Type type, BigInteger userId, Status status) {
+public record UpdateApplicationDto(
+        BigInteger id,
+        BigDecimal amount,
+        Integer type,
+        BigInteger userId,
+        Integer status,
+        Integer term) {
 }

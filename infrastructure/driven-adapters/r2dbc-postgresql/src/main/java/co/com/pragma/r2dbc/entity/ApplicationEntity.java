@@ -1,6 +1,5 @@
 package co.com.pragma.r2dbc.entity;
 
-import co.com.pragma.model.application.enums.Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,10 +22,15 @@ public class ApplicationEntity {
 
     private BigDecimal amount;
 
-    private String type;
+    @Column(name = "loan_type_id")
+    private Integer type;
 
     @Column(name = "user_id")
     private BigInteger userId;
-    private Status status;
+
+    @Column(name = "status_id")
+    private Integer status;
+
+    private Integer term;
 
 }
