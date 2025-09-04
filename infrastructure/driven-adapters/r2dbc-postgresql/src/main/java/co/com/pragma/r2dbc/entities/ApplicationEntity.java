@@ -1,4 +1,4 @@
-package co.com.pragma.r2dbc.entity;
+package co.com.pragma.r2dbc.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -23,6 +23,7 @@ public class ApplicationEntity {
     private BigDecimal amount;
 
     @Column(name = "loan_type_id")
+
     private Integer type;
 
     @Column(name = "user_id")
