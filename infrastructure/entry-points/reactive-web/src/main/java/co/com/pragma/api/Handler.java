@@ -26,13 +26,13 @@ public class Handler {
                         .bodyValue(savedApplication));
     }
 
-    public Mono<ServerResponse> listenUpdateApplication(ServerRequest serverRequest) {
+    /*public Mono<ServerResponse> listenUpdateApplication(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(Application.class)
                 .flatMap(application -> operator.transactional(useCase.updateApplication(application.getId(), application)))
                 .flatMap(updatedApplication -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(updatedApplication));
-    }
+    }*/
 
     public Mono<ServerResponse> listenGetApplication(ServerRequest serverRequest) {
         try {

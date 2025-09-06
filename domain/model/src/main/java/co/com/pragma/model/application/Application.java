@@ -19,4 +19,5 @@ public class Application {
     private Integer type;
     private BigInteger userId;
     private Integer status;
+    private Integer term;
 }
