@@ -17,7 +17,6 @@ public class ApplicationValidator {
         } else {
             validateNotNull(application.getAmount(), "Amount is required", errors);
             validateNotNull(application.getType(), "Type is required", errors);
-            validateNotNull(application.getUserId(), "Identification number is required", errors);
             validateNotNull(application.getTerm(), "Term is required", errors);
         }
 

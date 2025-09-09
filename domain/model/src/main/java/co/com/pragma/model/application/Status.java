@@ -8,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class Status {
-    Integer id;
+    Long id;
     String name;
     String description;
 }

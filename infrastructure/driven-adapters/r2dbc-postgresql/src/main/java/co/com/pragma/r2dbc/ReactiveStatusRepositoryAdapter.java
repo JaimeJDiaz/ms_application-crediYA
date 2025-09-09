@@ -9,14 +9,15 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
 @Repository
-public class ReactiveStatusRepositoryAdapter extends ReactiveAdapterOperations<Status, StatusEntity, Integer, ReactiveStatusRepository> implements StatusRepository {
+public class ReactiveStatusRepositoryAdapter extends ReactiveAdapterOperations<Status, StatusEntity, Long, ReactiveStatusRepository> implements StatusRepository {
     protected ReactiveStatusRepositoryAdapter(ReactiveStatusRepository repository, ObjectMapper mapper) {
         super(repository, mapper, entity -> mapper.map(entity, Status.class));
     }
 
     @Override
-    public Mono<Status> findById(Integer id) {
+    public Mono<Status> findById(Long id) {
         return super.findById(id)
                 .map(entity -> mapper.map(entity, Status.class));
     }
+
 }

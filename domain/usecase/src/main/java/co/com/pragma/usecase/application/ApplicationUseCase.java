@@ -1,12 +1,7 @@
 package co.com.pragma.usecase.application;
 
 import co.com.pragma.model.application.Application;
-import co.com.pragma.model.application.LoanType;
-import co.com.pragma.model.application.Status;
-import co.com.pragma.model.application.gateways.ApplicationRepository;
-import co.com.pragma.model.application.gateways.LoanTypeRepository;
-import co.com.pragma.model.application.gateways.LogPort;
-import co.com.pragma.model.application.gateways.StatusRepository;
+import co.com.pragma.model.application.gateways.*;
 import co.com.pragma.usecase.application.exception.ApplicationNotFoundException;
 import co.com.pragma.usecase.application.exception.ValidationException;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +15,13 @@ public class ApplicationUseCase {
 
     private final ApplicationRepository applicationRepository;
     private final LoanTypeRepository loanTypeRepository;
-    private final StatusRepository statusRepository;
+    private final UserService userService;
     private final ApplicationValidator validator;
     private final LogPort log;
 
-    public Mono<Application> saveApplication(Application application) {
+    public Mono<Application> saveApplication(Application application, String userIdentification) {
         return Mono.just(application)
-                .doOnNext(app -> app.setStatus(1))
+                .doOnNext(app -> app.setStatus(1L))
                 .doOnNext(validator::validateFields)
                 .flatMap(appVerified ->
                         loanTypeRepository.findById(appVerified.getType())
@@ -36,6 +31,14 @@ public class ApplicationUseCase {
                                     return appVerified;
                                 })
                 )
+                .flatMap(appVerified -> {
+                    return userService.getUserByIdentification(userIdentification)
+                            .switchIfEmpty(Mono.error(new ValidationException(List.of("User not found"))))
+                            .map(user -> {
+                                appVerified.setUserId(user.getId());
+                                return appVerified;
+                            });
+                })
                 .flatMap(applicationRepository::saveApplication);
     }
 

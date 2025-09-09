@@ -4,5 +4,5 @@ import co.com.pragma.model.application.Status;
 import reactor.core.publisher.Mono;
 
 public interface StatusRepository {
-    Mono<Status> findById(Integer status);
+    Mono<Status> findById(Long id);
 }

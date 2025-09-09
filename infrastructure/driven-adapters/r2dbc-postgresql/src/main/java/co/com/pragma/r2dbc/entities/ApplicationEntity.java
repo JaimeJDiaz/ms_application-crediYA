@@ -1,15 +1,18 @@
 package co.com.pragma.r2dbc.entities;
 
-import jakarta.persistence.*;
+
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-@Entity
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -17,20 +20,18 @@ import java.math.BigInteger;
 public class ApplicationEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private BigInteger id;
 
     private BigDecimal amount;
 
-    @Column(name = "loan_type_id")
+    @Column("loan_type_id")
+    private Long type;
 
-    private Integer type;
-
-    @Column(name = "user_id")
+    @Column("user_id")
     private BigInteger userId;
 
-    @Column(name = "status_id")
-    private Integer status;
+    @Column("status_id")
+    private Long status;
 
     private Integer term;
 

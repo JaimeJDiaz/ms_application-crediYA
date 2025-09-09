@@ -1,4 +1,4 @@
-package co.com.pragma.api.exceptionhandler;
+package co.com.pragma.exceptionhandler;
 
 import co.com.pragma.usecase.application.exception.ValidationException;
 import org.springframework.http.HttpStatus;

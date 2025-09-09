@@ -9,13 +9,13 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
 @Repository
-public class ReactiveLoanTypeRepositoryAdapter extends ReactiveAdapterOperations<LoanType, LoanTypeEntity, Integer, ReactiveLoanTypeRepository> implements LoanTypeRepository {
+public class ReactiveLoanTypeRepositoryAdapter extends ReactiveAdapterOperations<LoanType, LoanTypeEntity, Long, ReactiveLoanTypeRepository> implements LoanTypeRepository {
     protected ReactiveLoanTypeRepositoryAdapter(ReactiveLoanTypeRepository repository, ObjectMapper mapper) {
         super(repository, mapper, entity -> mapper.map(entity, LoanType.class));
     }
 
     @Override
-    public Mono<LoanType> findById(Integer id) {
+    public Mono<LoanType> findById(Long id) {
         return super.findById(id)
                 .map(entity -> mapper.map(entity, LoanType.class));
     }

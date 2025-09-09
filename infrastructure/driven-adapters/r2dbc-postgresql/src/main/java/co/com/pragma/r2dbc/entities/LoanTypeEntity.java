@@ -1,6 +1,7 @@
 package co.com.pragma.r2dbc.entities;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,7 +9,6 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import java.math.BigDecimal;
 
-@Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -16,8 +16,7 @@ import java.math.BigDecimal;
 public class LoanTypeEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     private String name;
 
@@ -25,10 +24,10 @@ public class LoanTypeEntity {
 
     private BigDecimal maxAmount;
 
-    @Column(name = "interest_rate")
+    @Column("interest_rate")
     private BigDecimal interestRate;
 
-    @Column(name = "auto_validation")
+    @Column("auto_validation")
     private Boolean autoValidation;
 
 }

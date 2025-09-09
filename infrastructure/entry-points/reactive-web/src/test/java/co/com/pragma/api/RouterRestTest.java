@@ -1,60 +1,99 @@
 package co.com.pragma.api;
 
-import org.assertj.core.api.Assertions;
+import co.com.pragma.model.application.Application;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.server.ServerResponse;
 
-@ContextConfiguration(classes = {RouterRest.class, Handler.class})
+import java.math.BigDecimal;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+@ContextConfiguration(classes = {RouterRest.class})
+@Import(RouterRestTest.HandlerMockConfig.class)
 @WebFluxTest
 class RouterRestTest {
 
     @Autowired
     private WebTestClient webTestClient;
 
-    @Test
-    void testListenGETUseCase() {
-        webTestClient.get()
-                .uri("/api/usecase/path")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(String.class)
-                .value(userResponse -> {
-                            Assertions.assertThat(userResponse).isEmpty();
-                        }
-                );
+    @Autowired
+    private Handler handler;
+
+    private Application mockApp;
+
+    @TestConfiguration
+    static class HandlerMockConfig {
+        @Bean
+        public Handler handler() {
+            return Mockito.mock(Handler.class);
+        }
+    }
+
+    @BeforeEach
+    void setUp() {
+        mockApp = Application.builder()
+                .amount(BigDecimal.valueOf(1000))
+                .type(1L)
+                .term(12)
+                .userId(null)
+                .build();
     }
 
     @Test
-    void testListenGETOtherUseCase() {
-        webTestClient.get()
-                .uri("/api/otherusercase/path")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(String.class)
-                .value(userResponse -> {
-                            Assertions.assertThat(userResponse).isEmpty();
-                        }
-                );
-    }
+    void testPostSolicitud_success() {
+        when(handler.listenSaveApplication(any())).thenReturn(
+                ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(mockApp)
+        );
 
-    @Test
-    void testListenPOSTUseCase() {
+        String json = "{" +
+                "\"amount\":1000," +
+                "\"type\":1," +
+                "\"userIdentification\":\"123456789\"," +
+                "\"term\":12" +
+                "}";
+
         webTestClient.post()
-                .uri("/api/usecase/otherpath")
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue("")
+                .uri("/api/v1/solicitudes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(json)
                 .exchange()
                 .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.amount").isEqualTo(1000)
+                .jsonPath("$.type").isEqualTo(1)
+                .jsonPath("$.term").isEqualTo(12);
+    }
+
+    @Test
+    void testPostSolicitud_error() {
+        when(handler.listenSaveApplication(any())).thenReturn(ServerResponse.badRequest().bodyValue("error"));
+
+        String json = "{" +
+                "\"amount\":1000," +
+                "\"type\":1," +
+                "\"userIdentification\":\"123456789\"," +
+                "\"term\":12" +
+                "}";
+
+        webTestClient.post()
+                .uri("/api/v1/solicitudes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(json)
+                .exchange()
+                .expectStatus().isBadRequest()
                 .expectBody(String.class)
-                .value(userResponse -> {
-                            Assertions.assertThat(userResponse).isEmpty();
-                        }
-                );
+                .isEqualTo("error");
     }
 }

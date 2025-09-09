@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class LoanType {
-    Integer id;
+    Long id;
     String name;
     BigDecimal minAmount;
     BigDecimal maxAmount;

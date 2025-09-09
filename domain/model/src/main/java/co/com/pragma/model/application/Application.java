@@ -16,8 +16,8 @@ import java.math.BigInteger;
 public class Application {
     private BigInteger id;
     private BigDecimal amount;
-    private Integer type;
+    private Long type;
     private BigInteger userId;
-    private Integer status;
+    private Long status;
     private Integer term;
 }

@@ -1,5 +1,6 @@
 package co.com.pragma.api;
 
+import co.com.pragma.api.dto.CreateApplicationDto;
 import co.com.pragma.model.application.Application;
 import co.com.pragma.usecase.application.ApplicationUseCase;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +11,6 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
-import java.math.BigInteger;
 
 @Component
 @RequiredArgsConstructor
@@ -19,8 +19,16 @@ public class Handler {
     private final TransactionalOperator operator;
 
     public Mono<ServerResponse> listenSaveApplication(ServerRequest serverRequest) {
-        return serverRequest.bodyToMono(Application.class)
-                .flatMap(application -> operator.transactional(useCase.saveApplication(application)))
+        return serverRequest.bodyToMono(CreateApplicationDto.class)
+                .flatMap(dto -> {
+                    Application application = Application.builder()
+                            .amount(dto.amount())
+                            .type(dto.type() != null ? dto.type().longValue() : null)
+                            .term(dto.term())
+                            .build();
+                    String userIdentification = dto.userIdentification();
+                    return operator.transactional(useCase.saveApplication(application, userIdentification));
+                })
                 .flatMap(savedApplication -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(savedApplication));
@@ -34,7 +42,7 @@ public class Handler {
                         .bodyValue(updatedApplication));
     }*/
 
-    public Mono<ServerResponse> listenGetApplication(ServerRequest serverRequest) {
+    /*public Mono<ServerResponse> listenGetApplication(ServerRequest serverRequest) {
         try {
             BigInteger applicationId = new BigInteger(serverRequest.pathVariable("id"));
             return operator.transactional(useCase.getApplication(applicationId))
@@ -45,6 +53,6 @@ public class Handler {
         } catch (NumberFormatException e) {
             return ServerResponse.badRequest().bodyValue("ID inválid");
         }
-    }
+    }*/
 
 }
