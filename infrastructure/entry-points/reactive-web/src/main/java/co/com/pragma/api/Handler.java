@@ -5,6 +5,7 @@ import co.com.pragma.model.application.Application;
 import co.com.pragma.usecase.application.ApplicationUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -18,6 +19,7 @@ public class Handler {
     private final ApplicationUseCase useCase;
     private final TransactionalOperator operator;
 
+    @PreAuthorize("hasRole('CUSTOMER')")
     public Mono<ServerResponse> listenSaveApplication(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(CreateApplicationDto.class)
                 .flatMap(dto -> {
@@ -34,25 +36,17 @@ public class Handler {
                         .bodyValue(savedApplication));
     }
 
-    /*public Mono<ServerResponse> listenUpdateApplication(ServerRequest serverRequest) {
-        return serverRequest.bodyToMono(Application.class)
-                .flatMap(application -> operator.transactional(useCase.updateApplication(application.getId(), application)))
-                .flatMap(updatedApplication -> ServerResponse.ok()
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public Mono<ServerResponse> listenFindApplications(ServerRequest serverRequest) {
+        Integer page = serverRequest.queryParam("page").map(Integer::parseInt).orElse(0);
+        Integer size = serverRequest.queryParam("size").map(Integer::parseInt).orElse(20);
+        String status = serverRequest.queryParam("status").orElse(null);
+        return useCase.findApplications(page, size, status)
+                .flatMap(applications -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(updatedApplication));
-    }*/
+                        .bodyValue(applications));
+    }
 
-    /*public Mono<ServerResponse> listenGetApplication(ServerRequest serverRequest) {
-        try {
-            BigInteger applicationId = new BigInteger(serverRequest.pathVariable("id"));
-            return operator.transactional(useCase.getApplication(applicationId))
-                    .flatMap(application -> ServerResponse.ok()
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .bodyValue(application))
-                    .switchIfEmpty(ServerResponse.notFound().build());
-        } catch (NumberFormatException e) {
-            return ServerResponse.badRequest().bodyValue("ID inválid");
-        }
-    }*/
+
 
 }

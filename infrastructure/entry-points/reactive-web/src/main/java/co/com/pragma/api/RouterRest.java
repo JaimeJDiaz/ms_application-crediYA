@@ -35,12 +35,25 @@ public class RouterRest {
                                     @ApiResponse(responseCode = "400", description = "Solicitud inválida")
                             }
                     )
+            ),
+            @RouterOperation(path = "/api/v1/solicitudes", produces = "application/json", method = RequestMethod.GET,
+                    beanClass = Handler.class, beanMethod = "listenFindApplications",
+                    operation = @Operation(
+                            operationId = "findApplications",
+                            summary = "Consulta solicitudes con paginación y filtro por estado",
+                            tags = {"Solicitudes"},
+                            responses = {
+                                    @ApiResponse(responseCode = "200", description = "Lista paginada de aplicaciones",
+                                            content = @Content(schema = @Schema(implementation = Application.class)))
+                            }
+                    )
             )
     })
     @Bean
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
         return route()
                 .POST("/api/v1/solicitudes", handler::listenSaveApplication)
+                .GET("/api/v1/solicitudes", handler::listenFindApplications)
                 .build();
 
     }

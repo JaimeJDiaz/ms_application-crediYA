@@ -27,8 +27,9 @@ class ApplicationUseCaseTest {
     private UserService userService;
     @Mock
     private ApplicationValidator validator;
+
     @Mock
-    private LogPort log;
+    private CatalogCachePort catalogCachePort;
 
     @InjectMocks
     private ApplicationUseCase applicationUseCase;
@@ -41,7 +42,7 @@ class ApplicationUseCaseTest {
                 loanTypeRepository,
                 userService,
                 validator,
-                log
+                catalogCachePort
         );
     }
 
@@ -80,7 +81,7 @@ class ApplicationUseCaseTest {
 
         StepVerifier.create(applicationUseCase.saveApplication(app, userIdentification))
                 .expectErrorSatisfies(e -> {
-                    assertTrue(e instanceof ValidationException);
+                    assertInstanceOf(ValidationException.class, e);
                     assertTrue(((ValidationException) e).getErrors().contains("Loan Type not found"));
                 })
                 .verify();
@@ -99,7 +100,7 @@ class ApplicationUseCaseTest {
 
         StepVerifier.create(applicationUseCase.saveApplication(app, userIdentification))
                 .expectErrorSatisfies(e -> {
-                    assertTrue(e instanceof ValidationException);
+                    assertInstanceOf(ValidationException.class, e);
                     assertTrue(((ValidationException) e).getErrors().contains("User not found"));
                 })
                 .verify();

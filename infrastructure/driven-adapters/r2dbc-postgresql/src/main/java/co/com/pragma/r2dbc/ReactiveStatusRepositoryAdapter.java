@@ -20,4 +20,10 @@ public class ReactiveStatusRepositoryAdapter extends ReactiveAdapterOperations<S
                 .map(entity -> mapper.map(entity, Status.class));
     }
 
+    @Override
+    public Mono<Status> findByName(String name) {
+        return super.repository.findByName(name)
+                .map(entity -> mapper.map(entity, Status.class));
+    }
+
 }
