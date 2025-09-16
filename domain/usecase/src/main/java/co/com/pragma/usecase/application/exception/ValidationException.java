@@ -1,7 +1,10 @@
 package co.com.pragma.usecase.application.exception;
 
+import lombok.Getter;
+
 import java.util.List;
 
+@Getter
 public class ValidationException extends RuntimeException {
     private final List<String> errors;
 
@@ -10,7 +13,4 @@ public class ValidationException extends RuntimeException {
         this.errors = errors;
     }
 
-    public List<String> getErrors() {
-        return errors;
-    }
 }

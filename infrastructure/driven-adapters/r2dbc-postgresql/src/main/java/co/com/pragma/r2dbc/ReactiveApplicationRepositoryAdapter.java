@@ -2,7 +2,7 @@ package co.com.pragma.r2dbc;
 
 import co.com.pragma.model.application.Application;
 import co.com.pragma.model.application.gateways.ApplicationRepository;
-import co.com.pragma.model.dto.PageResponse;
+import co.com.pragma.model.application.dto.PageResponse;
 import co.com.pragma.r2dbc.entities.ApplicationEntity;
 import co.com.pragma.r2dbc.helper.ReactiveAdapterOperations;
 import org.reactivecommons.utils.ObjectMapper;

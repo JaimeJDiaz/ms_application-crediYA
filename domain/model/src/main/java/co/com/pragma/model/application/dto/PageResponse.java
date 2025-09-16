@@ -1,4 +1,4 @@
-package co.com.pragma.model.dto;
+package co.com.pragma.model.application.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,7 +1,7 @@
 package co.com.pragma.model.application.gateways;
 
 import co.com.pragma.model.application.Application;
-import co.com.pragma.model.dto.PageResponse;
+import co.com.pragma.model.application.dto.PageResponse;
 import reactor.core.publisher.Mono;
 
 import java.math.BigInteger;

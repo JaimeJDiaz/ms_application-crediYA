@@ -2,7 +2,7 @@ package co.com.pragma.usecase.application;
 
 import co.com.pragma.model.application.Application;
 import co.com.pragma.model.application.gateways.*;
-import co.com.pragma.model.dto.PageResponse;
+import co.com.pragma.model.application.dto.PageResponse;
 import co.com.pragma.usecase.application.exception.ApplicationNotFoundException;
 import co.com.pragma.usecase.application.exception.ValidationException;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ public class ApplicationUseCase {
 
     public Mono<Application> saveApplication(Application application, String userIdentification) {
         return Mono.just(application)
-                .doOnNext(app -> app.setStatus(1L))
+                .doOnNext(app -> app.setStatus(catalogCachePort.getStatusIdByName("PENDING")))
                 .doOnNext(validator::validateFields)
                 .flatMap(appVerified ->
                         loanTypeRepository.findById(appVerified.getType())
