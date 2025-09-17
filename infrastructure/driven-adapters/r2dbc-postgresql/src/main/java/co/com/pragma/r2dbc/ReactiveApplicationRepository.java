@@ -11,10 +11,10 @@ import reactor.core.publisher.Mono;
 import java.math.BigInteger;
 
 public interface ReactiveApplicationRepository extends ReactiveCrudRepository<ApplicationEntity, BigInteger>, ReactiveQueryByExampleExecutor<ApplicationEntity> {
-    @Query("SELECT COUNT(*) FROM application WHERE (:statusId IS NULL OR status_id = :statusId)")
+    @Query("SELECT COUNT(*) FROM applications WHERE (:statusId IS NULL OR status_id = :statusId)")
     Mono<Long> countByStatusId(@Param("statusId") Long statusId);
 
-    @Query("SELECT * FROM application WHERE (:statusId IS NULL OR status_id = :statusId) OFFSET :offset LIMIT :limit")
+    @Query("SELECT * FROM applications WHERE (:statusId IS NULL OR status_id = :statusId) OFFSET :offset LIMIT :limit")
     Flux<ApplicationEntity> findByStatusIdPaged(@Param("statusId") Long statusId, @Param("offset") long offset, @Param("limit") int limit);
 
 
