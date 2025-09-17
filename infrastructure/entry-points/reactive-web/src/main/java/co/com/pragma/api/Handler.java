@@ -19,7 +19,7 @@ public class Handler {
     private final ApplicationUseCase useCase;
     private final TransactionalOperator operator;
 
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasRole('ROLE_CUSTOMER')")
     public Mono<ServerResponse> listenSaveApplication(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(CreateApplicationDto.class)
                 .flatMap(dto -> {
@@ -36,7 +36,7 @@ public class Handler {
                         .bodyValue(savedApplication));
     }
 
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public Mono<ServerResponse> listenFindApplications(ServerRequest serverRequest) {
         Integer page = serverRequest.queryParam("page").map(Integer::parseInt).orElse(0);
         Integer size = serverRequest.queryParam("size").map(Integer::parseInt).orElse(20);

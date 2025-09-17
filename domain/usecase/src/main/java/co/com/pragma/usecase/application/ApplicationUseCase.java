@@ -22,7 +22,7 @@ public class ApplicationUseCase {
 
     public Mono<Application> saveApplication(Application application, String userIdentification) {
         return Mono.just(application)
-                .doOnNext(app -> app.setStatus(catalogCachePort.getStatusIdByName("PENDING")))
+                .doOnNext(app -> app.setStatus(catalogCachePort.getStatusIdByName("PENDIENTE")))
                 .doOnNext(validator::validateFields)
                 .flatMap(appVerified ->
                         loanTypeRepository.findById(appVerified.getType())

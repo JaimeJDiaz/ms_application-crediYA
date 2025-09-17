@@ -33,17 +33,18 @@ public class JwtAuthenticationFilter implements WebFilter {
             if (jwtUtil.validateToken(token)) {
                 String subject = jwtUtil.getSubject(token);
                 String role = jwtUtil.getRole(token);
-                Authentication auth = new UsernamePasswordAuthenticationToken(
-                        subject,
-                        null,
-                        List.of(new SimpleGrantedAuthority(role))
-                );
-                SecurityContext context = new SecurityContextImpl(auth);
-                return chain.filter(exchange).contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(context)));
+                if (role != null && !role.trim().isEmpty()) {
+                    String springRole = role.startsWith("ROLE_") ? role : "ROLE_" + role;
+                    Authentication auth = new UsernamePasswordAuthenticationToken(
+                            subject,
+                            null,
+                            List.of(new SimpleGrantedAuthority(springRole))
+                    );
+                    SecurityContext context = new SecurityContextImpl(auth);
+                    return chain.filter(exchange).contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(context)));
+                }
             }
         }
-
         return chain.filter(exchange);
     }
 }
-
