@@ -5,6 +5,7 @@ import co.com.pragma.model.application.gateways.*;
 import co.com.pragma.model.application.dto.PageResponse;
 import co.com.pragma.usecase.application.exception.ApplicationNotFoundException;
 import co.com.pragma.usecase.application.exception.ValidationException;
+import co.com.pragma.model.mail.MailService;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -19,6 +20,7 @@ public class ApplicationUseCase {
     private final UserService userService;
     private final ApplicationValidator validator;
     private final CatalogCachePort catalogCachePort;
+    private final MailService mailService;
 
     public Mono<Application> saveApplication(Application application, String userIdentification) {
         return Mono.just(application)
@@ -57,5 +59,37 @@ public class ApplicationUseCase {
             throw new ValidationException(List.of("Status not found"));
         }
         return applicationRepository.findAll(page, size, statusId);
+    }
+
+    public Mono<Object> actionApplication(Long id, String action) {
+        if ("APPROVE".equals(action) || "REJECT".equals(action)) {
+            return getApplication(BigInteger.valueOf(id))
+                    .flatMap(application -> {
+                        if (!application.getStatus().equals(catalogCachePort.getStatusIdByName("PENDIENTE"))) {
+                            return Mono.error(new ValidationException(List.of("Only applications with PENDIENTE status can be processed")));
+                        }
+                        Long newStatusId = "APPROVE".equals(action) ?
+                                catalogCachePort.getStatusIdByName("APROBADA") :
+                                catalogCachePort.getStatusIdByName("RECHAZADA");
+                        application.setStatus(newStatusId);
+                        return applicationRepository.updateApplication(application)
+                                .flatMap(updatedApp ->
+                                        userService.getUserById(updatedApp.getUserId())
+                                                .flatMap(user -> {
+                                                    String subject = "APPROVE".equals(action) ?
+                                                            "Solicitud aprobada" : "Solicitud rechazada";
+                                                    String body = "Hola " + user.getName() + ",\n\n" +
+                                                            ("APPROVE".equals(action) ?
+                                                                    "Tu solicitud ha sido aprobada." :
+                                                                    "Tu solicitud ha sido rechazada.");
+                                                    return mailService.sendMail(user.getEmail(), subject, body)
+                                                            .onErrorResume(e -> Mono.empty()) // No fallar si el correo falla
+                                                            .thenReturn(updatedApp);
+                                                })
+                                );
+                    });
+        } else {
+            throw new ValidationException(List.of("Action must be either APPROVE or REJECT"));
+        }
     }
 }

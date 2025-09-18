@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.math.BigInteger;
+
 @Service
 @RequiredArgsConstructor
 public class UserAdapter implements UserService {
@@ -19,5 +21,10 @@ public class UserAdapter implements UserService {
     public Mono<User> getUserByIdentification(String identification) {
         return restConsumer.getUserByIdentification(identification)
                 .map(userMapper::toModel);
+    }
+
+    @Override
+    public Mono<Object> getUserById(BigInteger userId) {
+        return restConsumer.getUserById(userId);
     }
 }

@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.math.BigInteger;
+
 
 @Service
 @RequiredArgsConstructor
@@ -29,5 +31,21 @@ public class RestConsumer {
                         })
                 )
                 .bodyToMono(UserDto.class);
+    }
+
+    public Mono<Object> getUserById(BigInteger userId) {
+        String token = internalTokenService.getInternalToken();
+        return client
+                .get()
+                .uri("/" + userId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .retrieve()
+                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), response ->
+                        response.bodyToMono(String.class).flatMap(errorBody -> {
+                            System.err.println("Error al consumir el servicio: " + response.statusCode() + " - " + errorBody);
+                            return Mono.error(new RuntimeException("Error al consumir el servicio: " + response.statusCode() + " - " + errorBody));
+                        })
+                )
+                .bodyToMono(Object.class);
     }
 }

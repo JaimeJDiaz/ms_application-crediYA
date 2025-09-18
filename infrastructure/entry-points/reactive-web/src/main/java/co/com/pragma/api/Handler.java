@@ -1,5 +1,6 @@
 package co.com.pragma.api;
 
+import co.com.pragma.api.dto.ActionApplicationDto;
 import co.com.pragma.api.dto.CreateApplicationDto;
 import co.com.pragma.model.application.Application;
 import co.com.pragma.usecase.application.ApplicationUseCase;
@@ -47,6 +48,14 @@ public class Handler {
                         .bodyValue(applications));
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public Mono<ServerResponse> listenActionApplication(ServerRequest serverRequest) {
+        return serverRequest.bodyToMono(ActionApplicationDto.class)
+                .flatMap(dto -> operator.transactional(useCase.actionApplication(dto.id(), dto.action())))
+                .flatMap(updatedApplication -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(updatedApplication));
+    }
 
 
 }
