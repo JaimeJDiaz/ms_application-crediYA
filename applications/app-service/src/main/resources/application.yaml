@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: ${MS_APPLICATION_PORT:8080}
 spring:
   application:
     name: "ms-application"
@@ -24,19 +24,23 @@ management:
     circuitbreakers:
       enabled: true
 cors:
-  allowed-origins: "http://localhost:4200,http://localhost:8080"
+  allowed-origins: "http://localhost:4200,http://localhost:8080,http://localhost:8081"
 adapters:
   r2dbc:
-    host: "localhost"
-    port: 5432
-    database: "ms_application_db"
-    schema: "public"
-    username: "postgres"
-    password: "admin"
+    host: "${DB_HOST:localhost}"
+    port: "${DB_APPLICATION_PORT:5432}"
+    database: "${DB_APPLICATION_NAME:ms_application_db}"
+    schema: "${DB_SCHEMA:public}"
+    username: "${POSTGRES_USER:crediya_user}"
+    password: "${POSTGRES_PASSWORD:StrongPassword123!}"
 adapter:
   restconsumer:
     timeout: 5000
-    url: "http://localhost:8080"
+    url: "http://localhost:8081"
+  sqs:
+    region: "${SQS_REGION:us-east-1}"
+    queueUrl: "${SQS_QUEUE_URL:http://localstack:4566/000000000000/sample}"
+    endpoint: "${SQS_ENDPOINT:http://localstack:4566}"
 resilience4j:
   circuitbreaker:
     instances:
@@ -59,4 +63,4 @@ resilience4j:
         minimumNumberOfCalls: 10
         waitDurationInOpenState: "10s"
 jwt:
-  secret: clave-super-segura-de-32-caracteres-minimo
+  secret: "clave-super-segura-de-32-caracteres-minimo"

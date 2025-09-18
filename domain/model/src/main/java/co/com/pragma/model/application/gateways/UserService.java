@@ -8,6 +8,6 @@ import java.math.BigInteger;
 public interface UserService {
     Mono<User> getUserByIdentification(String identification);
 
-    Mono<Object> getUserById(BigInteger userId);
+    Mono<User> getUserById(BigInteger userId);
 }
 

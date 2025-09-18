@@ -1,5 +1,6 @@
 package co.com.pragma.exceptionhandler;
 
+import co.com.pragma.sqs.sender.exception.SqsSerializationException;
 import co.com.pragma.usecase.application.exception.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,5 +23,13 @@ public class GlobalExceptionHandler {
         body.put("errors", ex.getErrors());
 
         return Mono.just(ResponseEntity.badRequest().body(body));
+    }
+
+    @ExceptionHandler(SqsSerializationException.class)
+    public Mono<ResponseEntity<String>> handleSqsSerializationException(SqsSerializationException ex) {
+        return Mono.just(
+                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Error serializing message for SQS: " + ex.getMessage())
+        );
     }
 }

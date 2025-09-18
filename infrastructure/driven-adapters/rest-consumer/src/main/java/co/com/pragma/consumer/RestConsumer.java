@@ -2,6 +2,7 @@ package co.com.pragma.consumer;
 
 
 import co.com.pragma.consumer.jwt.InternalTokenService;
+import co.com.pragma.model.application.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -26,14 +27,13 @@ public class RestConsumer {
                 .retrieve()
                 .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), response ->
                         response.bodyToMono(String.class).flatMap(errorBody -> {
-                            System.err.println("Error al consumir el servicio: " + response.statusCode() + " - " + errorBody);
                             return Mono.error(new RuntimeException("Error al consumir el servicio: " + response.statusCode() + " - " + errorBody));
                         })
                 )
                 .bodyToMono(UserDto.class);
     }
 
-    public Mono<Object> getUserById(BigInteger userId) {
+    public Mono<User> getUserById(BigInteger userId) {
         String token = internalTokenService.getInternalToken();
         return client
                 .get()
@@ -42,10 +42,9 @@ public class RestConsumer {
                 .retrieve()
                 .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), response ->
                         response.bodyToMono(String.class).flatMap(errorBody -> {
-                            System.err.println("Error al consumir el servicio: " + response.statusCode() + " - " + errorBody);
                             return Mono.error(new RuntimeException("Error al consumir el servicio: " + response.statusCode() + " - " + errorBody));
                         })
                 )
-                .bodyToMono(Object.class);
+                .bodyToMono(User.class);
     }
 }

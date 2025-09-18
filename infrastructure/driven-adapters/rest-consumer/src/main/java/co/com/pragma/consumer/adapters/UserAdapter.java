@@ -24,7 +24,7 @@ public class UserAdapter implements UserService {
     }
 
     @Override
-    public Mono<Object> getUserById(BigInteger userId) {
+    public Mono<User> getUserById(BigInteger userId) {
         return restConsumer.getUserById(userId);
     }
 }

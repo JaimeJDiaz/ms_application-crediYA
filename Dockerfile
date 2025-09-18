@@ -1,17 +1,10 @@
-# Dockerfile para ms-application (Spring Boot, JDK 23)
+FROM openjdk:23-jdk-slim
 
-# Etapa 1: Build
-FROM eclipse-temurin:23-jdk AS build
 WORKDIR /app
-COPY . .
-RUN ./gradlew clean build -x test
 
-# Etapa 2: Imagen final
-FROM eclipse-temurin:23-jre
-WORKDIR /app
-COPY --from=build /app/build/libs/*.jar app.jar
-# (Opcional) Copiar el application.yaml si no está embebido en el .jar
-# COPY applications/app-service/src/main/resources/application.yaml ./application.yaml
-EXPOSE 8081
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Copiar el JAR ya construido
+COPY applications/app-service/build/libs/*.jar app.jar
 
+EXPOSE 8080
+ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
