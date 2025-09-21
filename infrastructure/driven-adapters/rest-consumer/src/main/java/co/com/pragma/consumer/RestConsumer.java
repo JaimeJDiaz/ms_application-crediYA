@@ -35,6 +35,69 @@ public class RestConsumer {
 
     public Mono<User> getUserById(BigInteger userId) {
         String token = internalTokenService.getInternalToken();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        .32getInternalToken();
         return client
                 .get()
                 .uri("/" + userId)
