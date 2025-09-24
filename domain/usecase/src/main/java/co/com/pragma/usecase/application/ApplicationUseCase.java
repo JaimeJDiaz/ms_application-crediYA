@@ -8,17 +8,15 @@ import co.com.pragma.usecase.application.exception.ValidationException;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
+
 import java.math.BigInteger;
 import java.util.List;
+
+import static co.com.pragma.usecase.application.ApplicationHelper.*;
 
 @RequiredArgsConstructor
 public class ApplicationUseCase {
 
-
-
-    private static final String STATUS_PENDIENTE = "Pendiente";
-    private static final String STATUS_APROBADA = "Aprobado";
-    private static final String STATUS_RECHAZADA = "Rechazada";
     private final ApplicationRepository applicationRepository;
     private final UserService userService;
     private final ApplicationValidator validator;
@@ -28,43 +26,12 @@ public class ApplicationUseCase {
 
     public Mono<Application> saveApplication(Application application, String userIdentification) {
         return Mono.just(application)
-                .doOnNext(app -> app.setStatus(catalogCachePort.getStatusIdByName("PENDIENTE")))
+                .doOnNext(app -> app.setStatus(catalogCachePort.getStatusIdByName(STATUS_PENDIENTE)))
                 .doOnNext(validator::validateFields)
-                .flatMap(appVerified ->
-                        catalogCachePort.getLoanTypeById(appVerified.getType())
-                                .switchIfEmpty(Mono.error(new ValidationException(List.of("Loan Type not found"))))
-                                .map(type -> {
-                                    validator.validateAmount(appVerified, type);
-                                    return appVerified;
-                                })
-                )
-                .flatMap(appVerified ->
-                    userService.getUserByIdentification(userIdentification)
-                            .switchIfEmpty(Mono.error(new ValidationException(List.of("User not found"))))
-                            .map(user -> {
-                                appVerified.setUserId(user.getId());
-                                return appVerified;
-                            })
-                )
+                .flatMap(app -> ApplicationHelper.validateLoanTypeAndAmount(app, catalogCachePort, validator))
+                .flatMap(appVerified -> ApplicationHelper.assignUserIdToApplication(appVerified, userIdentification, userService))
                 .flatMap(applicationRepository::saveApplication)
-                .flatMap(savedApp ->
-                    catalogCachePort.getLoanTypeById(application.getType())
-                        .flatMap(loanType -> {
-                            if (Boolean.TRUE.equals(loanType.getAutoValidation())) {
-                                try {
-                                    List<Application> approvedApps = (List<Application>) applicationRepository.findAllByUserIdAndStatus(application.getUserId(), catalogCachePort.getStatusIdByName(STATUS_APROBADA));
-                                    return queueSender.sendApplicationForAutomaticValidation(savedApp, approvedApps)
-                                            .thenReturn(savedApp);
-                                } catch (Exception e) {
-                                    log.error("Error fetching approved applications for userId: " + application.getUserId() + e);
-                                    return Mono.just(savedApp);
-                                }
-
-                            } else {
-                                return Mono.just(savedApp);
-                            }
-                        })
-                );
+                .flatMap(app -> ApplicationHelper.handleAutomaticValidation(app, catalogCachePort, applicationRepository, queueSender, log));
     }
 
     public Mono<Application> getApplication(BigInteger id) {
@@ -85,41 +52,14 @@ public class ApplicationUseCase {
 
     public Mono<Void> actionApplication(Long id, String action) {
         log.info("actionApplication called with id: " + id + " and action: " + action);
-        if ("APPROVE".equals(action) || "REJECT".equals(action)) {
-            return getApplication(BigInteger.valueOf(id))
-                    .doOnSubscribe(sub -> log.info("Fetching application with id: " + id))
-                    .flatMap(application -> {
-                        log.info("Application fetched: " + application);
-                        Long pendienteStatus = catalogCachePort.getStatusIdByName(STATUS_PENDIENTE);
-                        log.info("Status PENDIENTE id: " + pendienteStatus);
-                        if (!application.getStatus().equals(pendienteStatus)) {
-                            log.warn("Application status is not PENDIENTE. Current status: " + application.getStatus());
-                            return Mono.error(new ValidationException(List.of("Only applications with PENDIENTE status can be processed")));
-                        }
-                        Long newStatusId = "APPROVE".equals(action) ?
-                                catalogCachePort.getStatusIdByName(STATUS_APROBADA) :
-                                catalogCachePort.getStatusIdByName(STATUS_RECHAZADA);
-                        log.info("Setting new status id: " + newStatusId + " for action: " + action);
-                        application.setStatus(newStatusId);
-                        return applicationRepository.updateApplication(application)
-                                .doOnSuccess(updatedApp -> log.info("Application updated: " + updatedApp))
-                                .flatMap(updatedApp ->
-                                    userService.getUserById(updatedApp.getUserId())
-                                        .doOnSuccess(user -> log.info("User fetched for notification: " + user))
-                                        .flatMap(user -> {
-                                            String statusStr = "APPROVE".equals(action) ? "APROBADA" : "RECHAZADA";
-                                            log.info("Sending status change notification. Status: " + statusStr + ". Email: " + user.getEmail());
-                                            return queueSender.sendApplicationStatusChange(
-                                                updatedApp,
-                                                statusStr,
-                                                user.getEmail()
-                                            ).doOnSuccess(v -> log.info("Notification sent successfully"));
-                                        })
-                                );
-                    })
-                    .doOnError(e -> log.error("Error in actionApplication: " + e.getMessage() + e));
+        if (!ApplicationHelper.isValidAction(action)) {
+            log.warn("Invalid action received: " + action);
+            return Mono.error(new ValidationException(List.of("Invalid action")));
         }
-        log.warn("Invalid action received: " + action);
-        return Mono.error(new ValidationException(List.of("Invalid action")));
+        return getApplication(BigInteger.valueOf(id))
+                .doOnSubscribe(sub -> log.info("Fetching application with id: " + id))
+                .flatMap(app -> ApplicationHelper.validatePendingStatus(app, catalogCachePort, log))
+                .flatMap(app -> ApplicationHelper.updateStatusAndNotify(app, action, catalogCachePort, applicationRepository, userService, queueSender, log))
+                .doOnError(e -> log.error("Error in actionApplication: " + e.getMessage() + e));
     }
 }
