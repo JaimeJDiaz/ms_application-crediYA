@@ -1,6 +1,7 @@
 package co.com.pragma.usecase.application;
 
 import co.com.pragma.model.application.Application;
+import co.com.pragma.model.application.LoanType;
 import co.com.pragma.model.application.gateways.*;
 import co.com.pragma.usecase.application.exception.ValidationException;
 import reactor.core.publisher.Mono;
@@ -31,23 +32,30 @@ public class ApplicationHelper {
                 });
     }
 
-    public static Mono<Application> handleAutomaticValidation(Application savedApp, CatalogCachePort catalogCachePort, ApplicationRepository applicationRepository, QueueSender queueSender, LogPort log) {
+    public static Mono<Application> handleAutomaticValidation(Application savedApp, CatalogCachePort catalogCachePort, ApplicationRepository applicationRepository, QueueSender queueSender, LogPort log, UserService userService) {
         return catalogCachePort.getLoanTypeById(savedApp.getType())
             .flatMap(loanType -> {
                 if (Boolean.TRUE.equals(loanType.getAutoValidation())) {
-                    return applicationRepository.findAllByUserIdAndStatus(
-                            savedApp.getUserId(),
-                            catalogCachePort.getStatusIdByName(STATUS_APROBADA)
-                        )
-                        .collectList()
-                        .flatMap(approvedApps ->
-                            queueSender.sendApplicationForAutomaticValidation(savedApp, approvedApps)
-                                .thenReturn(savedApp)
-                        )
-                        .onErrorResume(e -> {
-                            log.error("Error fetching approved applications for userId: " + savedApp.getUserId() + e);
-                            return Mono.just(savedApp);
-                        });
+                    return userService.getUserById(savedApp.getUserId())
+                        .flatMap(user ->
+                            applicationRepository.findAllByUserIdAndStatus(
+                                savedApp.getUserId(),
+                                catalogCachePort.getStatusIdByName(STATUS_APROBADA)
+                            )
+                            .collectList()
+                            .flatMap(approvedApps ->
+                                catalogCachePort.getAllLoanTypes()
+                                    .collectMap(LoanType::getId, LoanType::getInterestRate)
+                                    .flatMap(loanTypeRateMap ->
+                                        queueSender.sendApplicationForAutomaticValidation(savedApp, approvedApps, user, loanTypeRateMap)
+                                            .thenReturn(savedApp)
+                                    )
+                            )
+                            .onErrorResume(e -> {
+                                log.error("Error fetching approved applications for userId: " + savedApp.getUserId() + e);
+                                return Mono.just(savedApp);
+                            })
+                        );
                 } else {
                     return Mono.just(savedApp);
                 }

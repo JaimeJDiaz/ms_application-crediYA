@@ -1,6 +1,7 @@
 package co.com.pragma.sqs.sender;
 
 import co.com.pragma.model.application.Application;
+import co.com.pragma.model.application.User;
 import co.com.pragma.model.application.gateways.QueueSender;
 import co.com.pragma.sqs.sender.config.SQSSenderProperties;
 import co.com.pragma.sqs.sender.exception.SqsSerializationException;
@@ -14,7 +15,10 @@ import software.amazon.awssdk.services.sqs.SqsAsyncClient;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 
+
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Log4j2
@@ -43,11 +47,6 @@ public class SQSSender implements QueueSender {
         .then();
     }
 
-    @Override
-    public Mono<Void> sendApplicationForAutomaticValidation(Application savedApp, List<Application> approvedApps) {
-        return null;
-    }
-
     public Mono<String> send(String message) {
         return Mono.fromCallable(() -> buildRequest(message))
                 .flatMap(request -> Mono.fromFuture(client.sendMessage(request)))
@@ -61,5 +60,42 @@ public class SQSSender implements QueueSender {
                 .messageBody(message)
                 .build();
     }
+
+    @Override
+    public Mono<Void> sendApplicationForAutomaticValidation(Application savedApp, List<Application> approvedApps, User user, Map<Long, BigDecimal> loanTypeRateMap) {
+        return Mono.fromCallable(() -> {
+            var message = new java.util.HashMap<String, Object>();
+            message.put("application", savedApp);
+            message.put("approvedApplications", approvedApps);
+            message.put("user", user);
+            message.put("sentAt", java.time.Instant.now().toString());
+            message.put("interestRates", loanTypeRateMap);
+            try {
+                return objectMapper.writeValueAsString(message);
+            } catch (JsonProcessingException e) {
+                throw new SqsSerializationException("Error serializando mensaje SQS para validación automática", e);
+            }
+        })
+        .flatMap(this::sendToAutomaticValidationQueue)
+        .then();
+    }
+
+    private Mono<String> sendToAutomaticValidationQueue(String message) {
+        return Mono.fromCallable(() -> buildAutomaticValidationRequest(message))
+                .flatMap(request -> Mono.fromFuture(client.sendMessage(request)))
+                .doOnNext(response -> log.debug("Automatic validation message sent {}", response.messageId()))
+                .map(SendMessageResponse::messageId);
+    }
+
+    private SendMessageRequest buildAutomaticValidationRequest(String message) {
+        return SendMessageRequest.builder()
+                .queueUrl(properties.automaticValidationQueueUrl())
+                .messageBody(message)
+                .build();
+    }
+
+
+
+
 
 }

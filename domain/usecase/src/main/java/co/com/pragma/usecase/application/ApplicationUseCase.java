@@ -31,7 +31,7 @@ public class ApplicationUseCase {
                 .flatMap(app -> ApplicationHelper.validateLoanTypeAndAmount(app, catalogCachePort, validator))
                 .flatMap(appVerified -> ApplicationHelper.assignUserIdToApplication(appVerified, userIdentification, userService))
                 .flatMap(applicationRepository::saveApplication)
-                .flatMap(app -> ApplicationHelper.handleAutomaticValidation(app, catalogCachePort, applicationRepository, queueSender, log));
+                .flatMap(app -> ApplicationHelper.handleAutomaticValidation(app, catalogCachePort, applicationRepository, queueSender, log, userService));
     }
 
     public Mono<Application> getApplication(BigInteger id) {

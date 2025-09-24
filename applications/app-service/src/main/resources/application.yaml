@@ -40,6 +40,7 @@ adapter:
   sqs:
     region: "${SQS_REGION:us-east-2}"
     queueUrl: "${SQS_QUEUE_URL:https://sqs.us-east-2.amazonaws.com/996068820488/ColaDeMnesajes}"
+    automaticValidationQueueUrl: "${SQS_AUTOMATIC_VALIDATION_QUEUE_URL:https://sqs.us-east-2.amazonaws.com/996068820488/AutomaticValidationQueu}"
     #endpoint: "${SQS_ENDPOINT:http://localstack:4566}"
 resilience4j:
   circuitbreaker:

@@ -4,8 +4,10 @@ import co.com.pragma.model.application.LoanType;
 import co.com.pragma.model.application.gateways.CatalogCachePort;
 import co.com.pragma.model.application.gateways.LoanTypeRepository;
 import co.com.pragma.model.application.gateways.StatusRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import jakarta.annotation.PostConstruct;
@@ -13,17 +15,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
+@RequiredArgsConstructor
 @Service
 public class CatalogCacheService implements CatalogCachePort {
     private final StatusRepository statusRepository;
     private final LoanTypeRepository loanTypeRepository;
     private final Map<String, Long> statusNameToId = new ConcurrentHashMap<>();
     private final Map<Long, LoanType> loanTypeIdToObject = new ConcurrentHashMap<>();
-
-    public CatalogCacheService(StatusRepository statusRepository, LoanTypeRepository loanTypeRepository) {
-        this.statusRepository = statusRepository;
-        this.loanTypeRepository = loanTypeRepository;
-    }
 
     @PostConstruct
     public void init() {
@@ -63,5 +61,10 @@ public class CatalogCacheService implements CatalogCachePort {
             return loanTypeRepository.findById(id)
                 .doOnNext(loanType -> loanTypeIdToObject.put(loanType.getId(), loanType));
         }
+    }
+
+    @Override
+    public Flux<LoanType> getAllLoanTypes() {
+        return Flux.fromIterable(loanTypeIdToObject.values());
     }
 }
