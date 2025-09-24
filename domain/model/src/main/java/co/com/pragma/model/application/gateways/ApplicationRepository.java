@@ -16,5 +16,5 @@ public interface ApplicationRepository {
     Mono<Application> findById(BigInteger id);
 
     Mono<PageResponse<Application>> findAll(Integer page, Integer size, Long statusId);
-    Flux<Application> findAllByUserIdAndStatusId(BigInteger userId, Long statusId);
+    Flux<Application> findAllByUserIdAndStatus(BigInteger userId, Long statusId);
 }

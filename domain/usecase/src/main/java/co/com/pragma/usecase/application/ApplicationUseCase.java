@@ -52,7 +52,7 @@ public class ApplicationUseCase {
                         .flatMap(loanType -> {
                             if (Boolean.TRUE.equals(loanType.getAutoValidation())) {
                                 try {
-                                    List<Application> approvedApps = (List<Application>) applicationRepository.findAllByUserIdAndStatusId(application.getUserId(), catalogCachePort.getStatusIdByName(STATUS_APROBADA));
+                                    List<Application> approvedApps = (List<Application>) applicationRepository.findAllByUserIdAndStatus(application.getUserId(), catalogCachePort.getStatusIdByName(STATUS_APROBADA));
                                     return queueSender.sendApplicationForAutomaticValidation(savedApp, approvedApps)
                                             .thenReturn(savedApp);
                                 } catch (Exception e) {

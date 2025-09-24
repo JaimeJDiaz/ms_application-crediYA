@@ -62,7 +62,9 @@ public class ReactiveApplicationRepositoryAdapter extends ReactiveAdapterOperati
     }
 
     @Override
-    public Flux<Application> findAllByUserIdAndStatusId(BigInteger userId, Long statusId) {
-        return null;
+    public Flux<Application> findAllByUserIdAndStatus(BigInteger userId, Long statusId) {
+        return super.repository.findAllByUserIdAndStatus(userId, statusId)
+                .map(entity -> mapper.map(entity, Application.class));
+
     }
 }

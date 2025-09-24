@@ -17,5 +17,5 @@ public interface ReactiveApplicationRepository extends ReactiveCrudRepository<Ap
     @Query("SELECT * FROM applications WHERE (:statusId IS NULL OR status_id = :statusId) OFFSET :offset LIMIT :limit")
     Flux<ApplicationEntity> findByStatusIdPaged(@Param("statusId") Long statusId, @Param("offset") long offset, @Param("limit") int limit);
 
-
+    Flux<ApplicationEntity> findAllByUserIdAndStatus(BigInteger userId, Long statusId);
 }
