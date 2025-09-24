@@ -18,12 +18,9 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 public class RestConsumerConfig {
 
     private final String url;
-
     private final int timeout;
 
-    private final String USER_ENDPOINT = "http://localhost:8080/api/v1/usuarios";
-
-    public RestConsumerConfig(@Value(USER_ENDPOINT) String url,
+    public RestConsumerConfig(@Value("${adapter.restconsumer.url}") String url,
                               @Value("${adapter.restconsumer.timeout}") int timeout) {
         this.url = url;
         this.timeout = timeout;

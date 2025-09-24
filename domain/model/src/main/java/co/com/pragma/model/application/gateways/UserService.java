@@ -10,4 +10,3 @@ public interface UserService {
 
     Mono<User> getUserById(BigInteger userId);
 }
-

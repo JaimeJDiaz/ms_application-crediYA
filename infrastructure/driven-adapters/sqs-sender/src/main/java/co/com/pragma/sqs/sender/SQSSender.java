@@ -14,6 +14,8 @@ import software.amazon.awssdk.services.sqs.SqsAsyncClient;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 
+import java.util.List;
+
 @Service
 @Log4j2
 @RequiredArgsConstructor
@@ -39,6 +41,11 @@ public class SQSSender implements QueueSender {
         })
         .flatMap(this::send)
         .then();
+    }
+
+    @Override
+    public Mono<Void> sendApplicationForAutomaticValidation(Application savedApp, List<Application> approvedApps) {
+        return null;
     }
 
     public Mono<String> send(String message) {

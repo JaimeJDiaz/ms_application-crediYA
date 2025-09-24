@@ -25,5 +25,8 @@ public class Slf4jLogAdapter implements LogPort {
     public void error(String message) {
         logger.error(message);
     }
+
+    @Override
+    public void warn(String message) { logger.warn(message); }
 }
 

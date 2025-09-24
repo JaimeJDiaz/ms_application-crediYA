@@ -47,6 +47,22 @@ public class RouterRest {
                                             content = @Content(schema = @Schema(implementation = Application.class)))
                             }
                     )
+            ),
+            @RouterOperation(path = "/api/v1/solicitudes/action", produces = "application/json", method = RequestMethod.PUT,
+                    beanClass = Handler.class, beanMethod = "listenActionApplication",
+                    operation = @Operation(
+                            operationId = "actionApplication",
+                            summary = "Aprueba o rechaza una solicitud",
+                            tags = {"Solicitudes"},
+                            requestBody = @RequestBody(
+                                    content = @Content(schema = @Schema(implementation = co.com.pragma.api.dto.ActionApplicationDto.class))
+                            ),
+                            responses = {
+                                    @ApiResponse(responseCode = "200", description = "Solicitud procesada exitosamente",
+                                            content = @Content(schema = @Schema(implementation = co.com.pragma.model.application.Application.class))),
+                                    @ApiResponse(responseCode = "400", description = "Solicitud inválida")
+                            }
+                    )
             )
     })
     @Bean
@@ -54,6 +70,7 @@ public class RouterRest {
         return route()
                 .POST("/api/v1/solicitudes", handler::listenSaveApplication)
                 .GET("/api/v1/solicitudes", handler::listenFindApplications)
+                .PUT("/api/v1/solicitudes", handler::listenActionApplication)
                 .build();
 
     }

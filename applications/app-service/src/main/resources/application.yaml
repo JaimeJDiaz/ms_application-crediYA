@@ -31,16 +31,16 @@ adapters:
     port: "${DB_APPLICATION_PORT:5432}"
     database: "${DB_APPLICATION_NAME:ms_application_db}"
     schema: "${DB_SCHEMA:public}"
-    username: "${POSTGRES_USER:crediya_user}"
-    password: "${POSTGRES_PASSWORD:StrongPassword123!}"
+    username: "${POSTGRES_USER:postgres}"
+    password: "${POSTGRES_PASSWORD:admin}"
 adapter:
   restconsumer:
     timeout: 5000
-    url: "http://localhost:8081"
+    url: "http://localhost:8081/api/v1/usuarios"
   sqs:
-    region: "${SQS_REGION:us-east-1}"
-    queueUrl: "${SQS_QUEUE_URL:http://localstack:4566/000000000000/sample}"
-    endpoint: "${SQS_ENDPOINT:http://localstack:4566}"
+    region: "${SQS_REGION:us-east-2}"
+    queueUrl: "${SQS_QUEUE_URL:https://sqs.us-east-2.amazonaws.com/996068820488/ColaDeMnesajes}"
+    #endpoint: "${SQS_ENDPOINT:http://localstack:4566}"
 resilience4j:
   circuitbreaker:
     instances:
