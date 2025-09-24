@@ -2,7 +2,7 @@ package co.com.pragma.metrics.aws;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.metrics.MetricCollection;
 import software.amazon.awssdk.metrics.MetricPublisher;
@@ -13,7 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Component
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class MicrometerMetricPublisher implements MetricPublisher {
     private final ExecutorService service = Executors.newFixedThreadPool(10);
     private final MeterRegistry registry;
